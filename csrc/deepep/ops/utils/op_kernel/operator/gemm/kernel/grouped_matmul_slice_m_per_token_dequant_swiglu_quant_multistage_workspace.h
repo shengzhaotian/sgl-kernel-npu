@@ -1,11 +1,3 @@
-/*
- * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
- * Description: FusedDeepMoe operator kernel function implementation file
- * Author: WANG Qiankun
- * Create: 2025-07-19
- * Note:
- * History: 2025-07-19 create FusedDeepMoe operator kernel function implementation file
- */
 #pragma once
 
 #include "../../catlass/act/act.hpp"
@@ -629,8 +621,8 @@ public:
                 stageId = (stageId + 1 < WORKSPACE_STAGES) ? (stageId + 1) : 0;
             }
 
-            gmGroupOffsetA += inGroupProblemShape.m() * inGroupProblemShape.k();
-            gmGroupOffsetB += inGroupProblemShape.k() * inGroupProblemShape.n();
+            gmGroupOffsetA += static_cast<int64_t>(inGroupProblemShape.m()) * inGroupProblemShape.k();
+            gmGroupOffsetB += static_cast<int64_t>(inGroupProblemShape.k()) * inGroupProblemShape.n();
 
             startCoreIdx = (startCoreIdx + coreLoops) % aicNum;
         }
@@ -1183,7 +1175,8 @@ void RecvToken(GM_ADDR gmX1, GM_ADDR gmX1Scale, GM_ADDR gmEpSendCount, uint32_t 
         for (uint32_t j = 0; j < count; j++) {
             tokGlobal.SetGlobalBuffer((__gm__ int8_t *)(wAddr + j * hCommuSize));
             tokGlobalInt32.SetGlobalBuffer((__gm__ int32_t *)(wAddr + j * hCommuSize + hOutSize));
-            expandXOutGlobal.SetGlobalBuffer((__gm__ int8_t *)(gmX1) + (beginIdx + j) * tokenLength, tokenLength);
+            expandXOutGlobal.SetGlobalBuffer(
+                (__gm__ int8_t *)(gmX1) + static_cast<uint64_t>(beginIdx + j) * tokenLength, tokenLength);
 
             while (true) {
                 AscendC::DataCopy(tmpLocalTensor, tokGlobalInt32, INT32_COUNT_PER_BLOCK);
@@ -1347,7 +1340,7 @@ void CompCoreFunc(GM_ADDR gmCVSwapBuff, __gm__ ElementScale *gmScale, __gm__ Ele
 
             gmGroupOffsetScale += inGroupProblemShape.n();
             gmGroupOffsetPerTokenScale += inGroupProblemShape.m();
-            gmGroupOffsetD += currentM * nOut;
+            gmGroupOffsetD += static_cast<uint64_t>(currentM) * nOut;
 
             startCoreIdx = (startCoreIdx + coreLoops) % aiCoreGroupNum;
         }
@@ -1861,8 +1854,8 @@ public:
                 stageId = (stageId + 1 < WORKSPACE_STAGES) ? (stageId + 1) : 0;
             }
 
-            gmGroupOffsetA += inGroupProblemShape.m() * inGroupProblemShape.k();
-            gmGroupOffsetB += inGroupProblemShape.k() * inGroupProblemShape.n();
+            gmGroupOffsetA += static_cast<int64_t>(inGroupProblemShape.m()) * inGroupProblemShape.k();
+            gmGroupOffsetB += static_cast<int64_t>(inGroupProblemShape.k()) * inGroupProblemShape.n();
 
             startCoreIdx = (startCoreIdx + coreLoops) % coreNum;
         }
@@ -1948,7 +1941,7 @@ public:
 
                 gmGroupOffsetScale += inGroupProblemShape.n();
                 gmGroupOffsetPerTokenScale += inGroupProblemShape.m();
-                gmGroupOffsetD += currentM * nOut;
+                gmGroupOffsetD += static_cast<uint64_t>(currentM) * nOut;
 
                 startCoreIdx = (startCoreIdx + coreLoops) % coreNum;
             }
